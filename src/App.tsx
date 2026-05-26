@@ -35,19 +35,8 @@ const App = () => {
             <ResourcePoolCard />
           </div>
 
-          <div className="md:col-span-2 md:row-span-1 min-h-0">
+          <div className="md:col-span-4 md:row-span-1 min-h-0">
             <SystemLogsCard />
-          </div>
-
-          <div className="md:col-span-2 md:row-span-1">
-            <section className="bento-card flex flex-col justify-center items-center border-dashed border-2 border-rose-500/20 bg-rose-500/5 group hover:bg-rose-500/10 transition-colors">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-rose-500/70 group-hover:text-rose-500 transition-colors">
-                Deadlock Detector
-              </h3>
-              <p className="text-xs text-hospital-muted mt-2 font-mono bg-black/10 dark:bg-black/30 px-3 py-1 rounded-full shadow-inner">
-                Status: Awaiting WebSocket graph data...
-              </p>
-            </section>
           </div>
         </main>
       </div>
