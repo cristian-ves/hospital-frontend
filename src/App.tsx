@@ -7,9 +7,11 @@ import {
   ResourcePoolCard,
 } from "./components/dashboard";
 import { useTheme } from "./hooks/useTheme";
+import { useHospitalSocket } from "./hooks/useHospitalSocket";
 
 const App = () => {
   useTheme();
+  useHospitalSocket();
 
   return (
     <div className="h-screen w-screen p-4 md:p-6 flex flex-col overflow-hidden">

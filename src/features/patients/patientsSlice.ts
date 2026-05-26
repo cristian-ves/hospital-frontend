@@ -1,34 +1,68 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-/**
- * Represents the patient data model for frontend state management.
- */
 export interface Patient {
   id: string;
   name: string;
   triageLevel: number;
 }
 
+export interface PatientStatus {
+  patientId: string;
+  name: string;
+  triageLevel: string; // "CRITICAL" | "EMERGENCY" | "URGENT" | etc.
+  status: "QUEUED" | "IN_PROGRESS" | "COMPLETED";
+  admittedAt: number;
+}
+
+export interface HospitalStats {
+  totalAttended: number;
+  avgWaitSeconds: number;
+}
+
 interface PatientsState {
-  list: Patient[];
+  /**
+   * tracks every patient the user submitted this session
+   */
+  admissionLog: Patient[];
+
+  activePatients: PatientStatus[];
+
+  stats: HospitalStats;
 }
 
 const initialState: PatientsState = {
-  list: [],
+  admissionLog: [],
+  activePatients: [],
+  stats: {
+    totalAttended: 0,
+    avgWaitSeconds: 0,
+  },
 };
 
-/**
- * Handles actions related to patient arrival, processing, and discharge.
- */
 const patientsSlice = createSlice({
-  name: 'patients',
+  name: "patients",
   initialState,
   reducers: {
     addPatient: (state, action: PayloadAction<Patient>) => {
-      state.list.push(action.payload);
+      state.admissionLog.push(action.payload);
+    },
+
+    /**
+     * Replaces the entire active patient list with the response of the backend.
+     */
+    setActivePatients: (state, action: PayloadAction<PatientStatus[]>) => {
+      state.activePatients = action.payload;
+    },
+
+    /**
+     * Updates dashboard statistics received from /topic/stats.
+     */
+    updateStats: (state, action: PayloadAction<HospitalStats>) => {
+      state.stats = action.payload;
     },
   },
 });
 
-export const { addPatient } = patientsSlice.actions;
+export const { addPatient, setActivePatients, updateStats } =
+  patientsSlice.actions;
 export default patientsSlice.reducer;
