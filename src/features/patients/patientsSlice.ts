@@ -12,6 +12,7 @@ export interface PatientStatus {
   triageLevel: string; // "CRITICAL" | "EMERGENCY" | "URGENT" | etc.
   status: "QUEUED" | "IN_PROGRESS" | "COMPLETED";
   admittedAt: number;
+  startedAt: number;
 }
 
 export interface HospitalStats {
