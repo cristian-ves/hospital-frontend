@@ -1,1 +1,61 @@
 @import "tailwindcss";
+
+@theme {
+  --color-hospital-green: #47EE81;
+  --color-hospital-dark: #565A8C;
+  --color-hospital-light: #EDEEFF;
+  --color-hospital-muted: #8D8EB1;
+
+  /* Light Mode: Shifted base slightly deeper to give white glass cards contrast */
+  --color-app-bg: #e6e9ff; 
+  --color-glass-fill: rgba(255, 255, 255, 0.45); 
+  --color-glass-border: rgba(255, 255, 255, 0.7); 
+  --color-text-main: var(--color-hospital-dark);
+  --bento-shadow: 0 8px 32px -4px rgba(86, 90, 140, 0.08); 
+}
+
+@custom-variant dark (&:is(.dark *));
+
+.dark {
+  --color-app-bg: #0e1017; 
+  --color-glass-fill: rgba(86, 90, 140, 0.05); 
+  --color-glass-border: rgba(255, 255, 255, 0.05); 
+  --color-text-main: #f1f2f6;
+  --bento-shadow: none;
+}
+
+@layer base {
+  html {
+    @apply bg-app-bg transition-colors duration-500;
+  }
+  
+  body {
+    /* Light mode gradient now sweeps across solid pastel periwinkle tones, making glass panels pop cleanly */
+    @apply bg-app-bg bg-gradient-to-br from-[#f3f5ff] via-[#e6e9ff] to-[#d2d7fc] 
+           dark:from-[#0b0d14] dark:via-[#131724] dark:to-[#1c2033] 
+           text-text-main transition-colors duration-500 antialiased font-sans min-h-screen;
+  }
+}
+
+@layer components {
+  .bento-card {
+    @apply bg-[var(--color-glass-fill)] 
+           backdrop-blur-xl 
+           border border-[var(--color-glass-border)] 
+           rounded-3xl 
+           p-6 
+           overflow-hidden
+           transition-all duration-200;
+    box-shadow: var(--bento-shadow);
+  }
+
+  .bento-card:hover {
+    @apply -translate-y-0.5;
+    border-color: rgba(86, 90, 140, 0.15);
+    
+    &:is(.dark *) {
+      border-color: rgba(255, 255, 255, 0.15);
+      background-color: rgba(86, 90, 140, 0.08);
+    }
+  }
+}
