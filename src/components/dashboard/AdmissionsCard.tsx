@@ -28,11 +28,14 @@ export const AdmissionsCard = () => {
     };
 
     try {
-      await fetch("http://localhost:8080/api/patients", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(patient),
-      });
+      await fetch(
+        "https://hospital-backend-production-c052.up.railway.app/api/patients",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(patient),
+        },
+      );
       dispatch(addPatient(patient));
       setName("");
       setTriageLevel(3);

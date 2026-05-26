@@ -9,7 +9,8 @@ import {
   updateStats,
 } from "../features/patients/patientsSlice";
 
-const WS_URL = "http://localhost:8080/ws-hospital";
+const WS_URL =
+  "https://hospital-backend-production-c052.up.railway.app/ws-hospital";
 
 export const useHospitalSocket = () => {
   const dispatch = useAppDispatch();
