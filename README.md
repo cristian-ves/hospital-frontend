@@ -1,73 +1,86 @@
-# React + TypeScript + Vite
+# Hospital Emergency System — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A real-time dashboard for visualizing a concurrent hospital emergency simulation, built with React, TypeScript, and Redux Toolkit. The interface reflects the exact in-memory state of the backend simulation through a live WebSocket connection — no polling, no manual refresh.
 
-Currently, two official plugins are available:
+**Live demo:** `https://hospital-emergency-room.netlify.app`
+**Backend repository:** [hospital-backend](https://github.com/cristian-ves/hospital-backend)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Overview
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+This client visualizes a multi-threaded resource allocation simulation running on a Spring Boot backend. Patients arrive with a priority-based triage level, compete for limited medical resources (operating rooms, surgeons, nurses, ventilators), and the dashboard reflects every state change — admissions, queue reordering, resource allocation, and deadlock conditions — as they happen on the server.
 
-## Expanding the ESLint configuration
+## Architecture
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+The frontend is purely reactive. Rather than fetching data on an interval, it maintains a single duplex WebSocket connection (STOMP over SockJS) to the backend. Every message received from the server dispatches a Redux action that updates the relevant state slice, which components subscribe to directly.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+Backend (Spring Boot)  ──STOMP/WS──>  useHospitalSocket hook  ──dispatch──>  Redux slices  ──>  UI
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+This approach minimizes browser CPU usage — there are no repeated network requests, only a continuous stream of deltas pushed by the server.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Module Structure
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src
+├── app
+│   ├── hooks.ts                 # Typed Redux hooks (useAppDispatch, useAppSelector)
+│   └── store.ts                 # Central Redux store configuration
+├── components
+│   ├── dashboard
+│   │   ├── AdmissionsCard.tsx     # New patient admission form (REST)
+│   │   ├── PatientQueueCard.tsx   # Live queue visualization (queued / in-progress)
+│   │   ├── ResourcePoolCard.tsx   # Real-time semaphore-backed resource availability
+│   │   ├── StatisticsCard.tsx     # Aggregated metrics (avg wait time, occupancy)
+│   │   └── SystemLogsCard.tsx     # Streaming event log console
+│   └── layout
+└── hooks
+    └── useHospitalSocket.ts     # WebSocket/STOMP connection and Redux dispatch bridge
+```
+
+## WebSocket Integration
+
+The `useHospitalSocket` hook owns the entire WebSocket lifecycle — connecting on mount, subscribing to backend topics, and dispatching the corresponding Redux action for each incoming message:
+
+| Topic                    | Action dispatched                  |
+| ------------------------ | ---------------------------------- |
+| `/topic/resource-status` | `updateResources`                  |
+| `/topic/patients`        | `setActivePatients`, `updateStats` |
+| `/topic/logs`            | `appendLog`                        |
+| `/topic/deadlock`        | deadlock state update              |
+
+The connection automatically reconnects on drop (e.g. backend redeploy) with a configured retry delay, and cleanly deactivates on component unmount.
+
+## Tech Stack
+
+-   **React** with **TypeScript**
+-   **Redux Toolkit** — state management via feature slices
+-   **@stomp/stompjs** + **sockjs-client** — WebSocket transport with browser fallback support
+-   **Vite** — build tooling
+
+## Running Locally
+
+```bash
+# clone the repository
+git clone https://github.com/cristian-ves/hospital-frontend.git
+cd hospital-frontend
+
+# install dependencies
+npm install
+
+# run the dev server
+npm run dev
+```
+
+By default the app connects to the deployed backend WebSocket URL. To point it at a local backend instance, update the `WS_URL` constant in `src/hooks/useHospitalSocket.ts` to `http://localhost:8080/ws-hospital`.
+
+## Related
+
+This is the frontend half of the Hospital Emergency System. The backend (Spring Boot, Java concurrency) is available at:
+**[hospital-backend](https://github.com/cristian-ves/hospital-backend)**
+
+## Author
+
+**Cristian Vásquez** — [LinkedIn](https://linkedin.com/in/cristian-vasquez-web-developer) · [GitHub](https://github.com/cristian-ves)
