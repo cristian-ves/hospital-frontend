@@ -2,7 +2,7 @@
 
 A real-time dashboard for visualizing a concurrent hospital emergency simulation, built with React, TypeScript, and Redux Toolkit. The interface reflects the exact in-memory state of the backend simulation through a live WebSocket connection — no polling, no manual refresh.
 
-**Live demo:** `https://hospital-emergency-room.netlify.app`
+**Live demo:** [click here](https://hospital-emergency-room.netlify.app)
 **Backend repository:** [hospital-backend](https://github.com/cristian-ves/hospital-backend)
 
 ---
