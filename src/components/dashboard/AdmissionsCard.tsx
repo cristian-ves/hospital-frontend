@@ -29,7 +29,7 @@ export const AdmissionsCard = () => {
 
     try {
       await fetch(
-        "https://hospital-backend-production-c052.up.railway.app/api/patients",
+        `${import.meta.env.VITE_API_BASE_URL}/api/patients`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
