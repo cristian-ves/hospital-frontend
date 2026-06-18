@@ -8,6 +8,7 @@ import {
     setActivePatients,
     updateStats,
 } from "../features/patients/patientsSlice";
+import { setConnectionStatus } from "../features/connection/connectionSlice";
 
 const WS_URL = `${import.meta.env.VITE_API_BASE_URL}/ws-hospital`;
 
@@ -16,10 +17,14 @@ export const useHospitalSocket = () => {
     const clientRef = useRef<Client | null>(null);
 
     useEffect(() => {
+        dispatch(setConnectionStatus("connecting"));
+
         const client = new Client({
             webSocketFactory: () => new SockJS(WS_URL),
             reconnectDelay: 3000,
             onConnect: () => {
+                dispatch(setConnectionStatus("connected"));
+
                 client.subscribe("/topic/resource-status", ({ body }) =>
                     dispatch(updateResources(JSON.parse(body)))
                 );
@@ -33,10 +38,17 @@ export const useHospitalSocket = () => {
                     dispatch(updateStats(JSON.parse(body)))
                 );
             },
+            onDisconnect: () => {
+                dispatch(setConnectionStatus("disconnected"));
+            },
+            onWebSocketError: () => {
+                dispatch(setConnectionStatus("connecting"));
+            },
         });
 
         client.activate();
         clientRef.current = client;
+
         return () => {
             client.deactivate();
         };
